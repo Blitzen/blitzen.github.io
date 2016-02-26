@@ -1,8 +1,8 @@
 (function () {
 
-angular.module( 'InlineTextEditor', []);
+angular.module( 'InlineTextEditor', ['ngSanitize']);
 
-function inlineTextEditor($sce, $compile, $timeout){
+function inlineTextEditor($sce, $compile, $timeout, $window, $sanitize){
   return {
     restrict: 'A',
     require: '?ngModel',
@@ -15,11 +15,31 @@ function inlineTextEditor($sce, $compile, $timeout){
       ngModel.$render = function() {
         element.html(ngModel.$viewValue || '');
       };
+
       // Write data to the model
       function read() {
-        html = element.html();
+        var html = element.html();
+        if (html == '<br>') {
+          angular.element(element).empty();
+          html = '';
+        }
         ngModel.$setViewValue(html);
-      }
+      };
+
+      //This is required if the directive holds any angular expressions (i.e. the ng-click expression on images)
+      $timeout(function() {
+        $compile(element.contents())($scope);
+      },0);
+
+      window.onunload = window.onbeforeunload = (function(){
+        return function(){
+          // do your thing here...
+          overlay = document.getElementById('ite-image-resize-overlay');
+          if (overlay) {
+            return 'you currently have an image selected, please de-select it before leaving the page'
+          }
+        }
+      }());
 
       $scope.linkUrl = null;
       $scope.expandLinkInput = false;
@@ -29,7 +49,7 @@ function inlineTextEditor($sce, $compile, $timeout){
       $scope.colors = [{"gold": "#ffd700"}, {"yellow": "#ffff00"}, {"springgreen": "#00ff7f"}, {"mediumspringgreen": "#00fa9a"}, {"cyan": "#00ffff"}, {"aqua": "#00ffff"}, {"turquoise": "#40e0d0"}, {"mediumturquoise": "#48d1cc"}, {"mediumaquamarine": "#66cdaa"}, {"darkseagreen": "#8fbc8f"}, {"lightgreen": "#90ee90"}, {"palegreen": "#98fb98"}, {"aquamarine": "#7fffd4"}, {"lightskyblue": "#87cefa"}, {"skyblue": "#87ceeb"}, {"paleturquoise": "#afeeee"}, {"powderblue": "#b0e0e6"}, {"lightblue": "#add8e6"}, {"lightsteelblue": "#b0c4de"}, {"silver": "#c0c0c0"}, {"darkgray": "#a9a9a9"}, {"rosybrown": "#bc8f8f"}, {"palevioletred": "#d87093"}, {"hotpink": "#ff69b4"}, {"lightpink": "#ffb6c1"}, {"pink": "#ffc0cb"}, {"lemonchiffon": "#fffacd"}, {"lightgoldenrodyellow": "#fafad2"}, {"lightyellow": "#ffffe0"}, {"cornsilk": "#fff8dc"}, {"beige": "#f5f5dc"}, {"linen": "#faf0e6"}, {"oldlace": "#fdf5e6"}, {"seashell": "#fff5ee"}, {"floralwhite": "#fffaf0"}, {"ivory": "#fffff0"}, {"white": "#ffffff"}, {"snow": "#fffafa"}, {"ghostwhite": "#f8f8ff"}, {"aliceblue": "#f0f8ff"}, {"azure": "#f0ffff"}, {"mintcream": "#f5fffa"}, {"honeydew": "#f0fff0"}, {"whitesmoke": "#f5f5f5"}, {"lavenderblush": "#fff0f5"}, {"mistyrose": "#ffe4e1"}, {"antiquewhite": "#faebd7"}, {"papayawhip": "#ffefd5"}, {"blanchedalmond": "#ffebcd"}, {"bisque": "#ffe4c4"}, {"peachpuff": "#ffdab9"}, {"moccasin": "#ffe4b5"}, {"navajowhite": "#ffdead"}, {"wheat": "#f5deb3"}, {"palegoldenrod": "#eee8aa"}, {"khaki": "#f0e68c"}, {"lightcyan": "#e0ffff"}, {"lavender": "#e6e6fa"}, {"gainsboro": "#dcdcdc"}, {"lightgrey": "#d3d3d3"}, {"thistle": "#d8bfd8"}, {"plum": "#dda0dd"}, {"violet": "#ee82ee"}, {"orchid": "#da70d6"}, {"mediumorchid": "#ba55d3"}, {"mediumpurple": "#9370d8"}, {"mediumslateblue": "#7b68ee"}, {"slateblue": "#6a5acd"}, {"royalblue": "#4169e1"}, {"steelblue": "#4682b4"}, {"cadetblue": "#5f9ea0"}, {"lightslategray": "#778899"}, {"slategray": "#708090"}, {"gray": "#808080"}, {"indianred ": "#cd5c5c"}, {"tomato": "#ff6347"}, {"coral": "#ff7f50"}, {"salmon": "#fa8072"}, {"lightcoral": "#f08080"}, {"darksalmon": "#e9967a"}, {"lightsalmon": "#ffa07a"}, {"sandybrown": "#f4a460"}, {"burlywood": "#deb887"}, {"tan": "#d2b48c"}, {"darkkhaki": "#bdb76b"}, {"yellowgreen": "#9acd32"}, {"greenyellow": "#adff2f"}, {"chartreuse": "#7fff00"}, {"lawngreen": "#7cfc00"}, {"lime": "#00ff00"}, {"limegreen": "#32cd32"}, {"mediumseagreen": "#3cb371"}, {"seagreen": "#2e8b57"}, {"forestgreen": "#228b22"}, {"green": "#008000"}, {"darkgreen": "#006400"}, {"black": "#000000"}, {"maroon": "#800000"}, {"darkred": "#8b0000"}, {"saddlebrown": "#8b4513"}, {"sienna": "#a0522d"}, {"brown": "#a52a2a"}, {"firebrick": "#b22222"}, {"crimson": "#dc143c"}, {"red": "#ff0000"}, {"orangered": "#ff4500"}, {"darkorange": "#ff8c00"}, {"orange": "#ffa500"}, {"goldenrod": "#daa520"}, {"peru": "#cd853f"}, {"chocolate": "#d2691e"}, {"darkgoldenrod": "#b8860b"}, {"olive": "#808000"}, {"olivedrab": "#6b8e23"}, {"darkolivegreen": "#556b2f"}, {"darkslategray": "#2f4f4f"}, {"darkslateblue": "#483d8b"}, {"dimgray": "#696969"}, {"teal": "#008080"}, {"darkcyan": "#008b8b"}, {"lightseagreen": "#20b2aa"}, {"darkturquoise": "#00ced1"}, {"deepskyblue": "#00bfff"}, {"dodgerblue": "#1e90ff"}, {"cornflowerblue": "#6495ed"}, {"darkorchid": "#9932cc"}, {"blueviolet": "#8a2be2"}, {"darkviolet": "#9400d3"}, {"blue": "#0000ff"}, {"mediumblue": "#0000cd"}, {"darkblue": "#00008b"}, {"navy": "#000080"}, {"midnightblue": "#191970"}, {"indigo": "#4b0082"}, {"purple": "#800080"}, {"darkmagenta": "#8b008b"}, {"mediumvioletred": "#c71585"}, {"deeppink": "#ff1493"}, {"magenta": "#ff00ff"}, {"fuchsia": "#ff00ff"}]
       rangy.init();
 
-      originalToolbar = [ '<div contentEditable="false" name="inlineToolbar" class="btn-group" role="group" aria-label="...">',
+      originalToolbar = [ '<div contentEditable="false" name="inlineToolbar" class="btn-group" role="group" aria-label="..." style="z-index:9999">',
                             '<button type="button" ng-click="applyClass(\'ite-bold\')" class="btn btn-default btn-sm" data-inline-type="ite-bold" title="bold"><i class="fa fa-bold"></i></button>',
                             '<button type="button" ng-click="applyClass(\'ite-italic\')" class="btn btn-default btn-sm" data-inline-type="ite-italic" title="italic"><i class="fa fa-italic"></i></button>',
                             '<button type="button" ng-click="applyClass(\'ite-underline\')" class="btn btn-default btn-sm" data-inline-type="ite-underline" title="underline"><i class="fa fa-underline"></i></button>',
@@ -37,7 +57,7 @@ function inlineTextEditor($sce, $compile, $timeout){
                             '<button type="button" ng-click="openColorPicker()" class="btn btn-default btn-sm" data-inline-type="ite-color"><i class="fa fa-eyedropper" title="colour picker"></i></button>',
                             '<div class="color-picker" ng-show="colorPickerActive">',
                               '<span ng-repeat="colorObj in colors">',
-                                '<span ng-click="applyColor(color)" ng-repeat="(color, hex) in colorObj | orderBy:key" class="color" style="background-color:{{color}}" ng-mouseover="setColors(color, hex)"></span>',
+                                '<span ng-click="applyColor((\'ite-\' + color))" ng-repeat="(color, hex) in colorObj | orderBy:key" class="color" style="background-color:{{color}}" ng-mouseover="setColors(color, hex)"></span>',
                               '</span>',
                               '<div class="small">{{activeColor}} {{activeHex}}</div>',
                               // '<input type="text" class="form-control input-sm"/>',
@@ -70,6 +90,17 @@ function inlineTextEditor($sce, $compile, $timeout){
         $scope.$evalAsync(read);
       });
 
+
+      element.on('paste', function() {
+        pastedContent = event.clipboardData.getData('text/plain');
+        if (event.preventDefault) {
+          event.stopPropagation();
+          event.preventDefault();
+        }
+        window.document.execCommand('insertText', false, pastedContent);
+      });
+
+
       // Create or remove toolbar depending on rangy selection
       element.bind('mouseup', function (e) {
         $scope.$evalAsync(function() {
@@ -91,9 +122,9 @@ function inlineTextEditor($sce, $compile, $timeout){
         removeToolbar();
       });
 
-      // Bind to escape key to remove the toolbar
+      // Bind to escape key and delete key to remove the toolbar
       element.bind("keydown", function (e) {
-          if (e.keyCode == 27) {
+          if (e.keyCode == 27 || e.keyCode == 8 || e.keyCode == 46) {
             removeToolbar('escape');
           }
       });
@@ -126,11 +157,12 @@ function inlineTextEditor($sce, $compile, $timeout){
 
       $scope.applyColor = function(color) {
         rangy.restoreSelection(savedSelection);
-        classApplier = rangy.createCssClassApplier('ite-color', {elementTagName: 'span', elementAttributes: {'style': 'color:' + color}});
-        classApplier.undoToSelection();
+        classApplier = rangy.createCssClassApplier(color);
+        // classApplier.undoToSelection();
         classApplier.applyToSelection();
-        savedSelection = rangy.saveSelection();
+        $scope.colorPickerActive = false;
         setButtonState();
+        removeToolbar('force');
       };
 
       $scope.setColors = function(color, hex) {
@@ -185,14 +217,14 @@ function inlineTextEditor($sce, $compile, $timeout){
         clearSelection();
 
         var target, targetWidth, targetHeight, ratio, overlayWidth, overlayHeight, startPositionX, startPositionY, currentPositionX, currentPositionY;
-        target = angular.element($event.srcElement)
-        targetWidth = $event.srcElement.width;
-        targetHeight = $event.srcElement.height;
+        target = angular.element($event.target)
+        targetWidth = $event.target.width;
+        targetHeight = $event.target.height;
         ratio = targetHeight / targetWidth;
 
         // hide the source image, and set up the nodes required for resizing the image
-        $event.srcElement.style.display = 'none';
-        target.after('<div tabindex="0" id="ite-image-resize-overlay" style="width:'+targetWidth+'px; height:'+targetHeight+'px;" contentEditable="false"><img src="'+$event.srcElement.currentSrc+'" height="100%" width="100%"/><div draggable="true" id="ite-image-handle-se" contentEditable="false"></div></div>');
+        angular.element($event.target).addClass('ite-display-none');
+        target.after('<div tabindex="0" id="ite-image-resize-overlay" style="width:'+targetWidth+'px; height:'+targetHeight+'px;" contentEditable="false"><img src="'+$event.target.currentSrc+'" height="100%" width="100%"/><div draggable="true" id="ite-image-handle-se" contentEditable="false"></div></div>');
         seHandle = document.getElementById('ite-image-handle-se');
         overlay = document.getElementById('ite-image-resize-overlay');
         overlay.focus();
@@ -215,6 +247,17 @@ function inlineTextEditor($sce, $compile, $timeout){
           }
         }
 
+        var tearDownAndReset = function() {
+          // Set final height for image
+          $event.target.width = targetWidth;
+          $event.target.height = targetHeight;
+          // Remove resize nodes
+          overlay.parentNode.removeChild(overlay);
+          // show the orginal image
+          angular.element($event.target).removeClass('ite-display-none');
+          $scope.$evalAsync(read);
+        }
+
         seHandle.addEventListener('dragstart', function(event) {
           startPositionX = event.pageX;
           startPositionY = event.pageY;
@@ -233,16 +276,11 @@ function inlineTextEditor($sce, $compile, $timeout){
         },false);
 
         angular.element(overlay).on('blur', function() {
-          // Set final height for image
-          $event.srcElement.width = targetWidth;
-          $event.srcElement.height = targetHeight;
-          // Remove resize nodes
-          overlay.parentNode.removeChild(overlay);
-          // show the orginal image
-          $event.srcElement.style.display = 'inline-block';
+          tearDownAndReset();
         });
 
       };
+
 
       $scope.applyImage = function() {
         // this checks if the user has typed in a link or not
@@ -293,7 +331,12 @@ function inlineTextEditor($sce, $compile, $timeout){
         if ($scope.expandLinkInput) {
 
           var httpRegex = new RegExp('http(s)?://', 'g', 'i');
-          $scope.linkUrl = $scope.linkUrl.match(httpRegex) ? $scope.linkUrl : 'http://'+$scope.linkUrl;
+          var anchorRegex = /(?:^|\s+)(#\w+)/;
+          var linkIsAnchor = $scope.linkUrl.match(anchorRegex);
+          
+          if (!linkIsAnchor) {
+            $scope.linkUrl = $scope.linkUrl.match(httpRegex) ? $scope.linkUrl : 'http://'+$scope.linkUrl;
+          }
 
           rangy.restoreSelection(savedSelection);
 
@@ -302,7 +345,11 @@ function inlineTextEditor($sce, $compile, $timeout){
             angular.element(rangy.getSelection().focusNode).attr('href', $scope.linkUrl);
 
           } else if($scope.inlineToolbarUrlForm.$valid) {
-            classApplier = rangy.createCssClassApplier('ite-link', {elementTagName: 'a', elementAttributes: {'href':$scope.linkUrl, 'target':'_blank'}});
+            if (linkIsAnchor) {
+              classApplier = rangy.createCssClassApplier('ite-link', {elementTagName: 'a', elementAttributes: {'href':$scope.linkUrl}});
+            } else {
+              classApplier = rangy.createCssClassApplier('ite-link', {elementTagName: 'a', elementAttributes: {'href':$scope.linkUrl, 'target':'_blank'}});
+            }
             classApplier.toggleSelection();
           }
           $scope.linkUrl = '';
@@ -460,15 +507,7 @@ function inlineTextEditor($sce, $compile, $timeout){
   };
 }
 
-inlineTextEditor.$inject = ["$sce", "$compile", "$timeout"];
-
-function toTrusted($sce){
-  return function(text) {
-      return $sce.trustAsHtml(text);
-  };
-}
-
-toTrusted.$inject = ["$sce"];
+inlineTextEditor.$inject = ["$sce", "$compile", "$timeout", "$window", "$sanitize"];
 
 function urlValidator() {
   return {
@@ -480,11 +519,11 @@ function urlValidator() {
     },
     link: function ($scope, element, attrs, ctrl) {
       element.on("keyup", function(event) {
-
-        var regex = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w\.\-\?\=\&]*)$/i;
-
+        
+        var urlRegex = /^(https?:\/\/)?([\da-z\.-]+)\.([a-z\.]{2,6})([\/\w\.\-\?\=\&\#\%\(\)\[\]\@\!\$\'\*\+\,\;\:]*)$/i;
+        var anchorRegex = /(?:^|\s+)(#\w+)/;
         // Set validity of the field controller
-        if ($scope.ngModel && $scope.ngModel.match(regex)) {
+        if ($scope.ngModel && ($scope.ngModel.match(urlRegex) || $scope.ngModel.match(anchorRegex)) ) {
           $scope.$apply(function() {
             ctrl.$setValidity("hyperlink", true);
           });
@@ -492,7 +531,13 @@ function urlValidator() {
           $scope.$apply(function() {
             ctrl.$setValidity("hyperlink", false);
           });
-            }
+        }
+
+        if (event.keyCode == 13) {
+          $scope.$apply(function() {
+            $scope.$parent.applyLink();
+          });
+        }
 
       });
     }
@@ -503,6 +548,5 @@ angular
   .module('InlineTextEditor')
   .directive('inlineTextEditor', inlineTextEditor)
   .directive('urlValidator', urlValidator)
-  .filter('toTrusted', toTrusted)
   ;
 })();
