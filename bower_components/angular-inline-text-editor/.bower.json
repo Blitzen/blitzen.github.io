@@ -1,0 +1,40 @@
+{
+  "name": "angular-inline-text-editor",
+  "version": "0.3.16",
+  "authors": [
+    "Duncan McDowell <duncan@blitzen.com>",
+    "Jordan Clark <jordan@blitzen.com>"
+  ],
+  "description": "An inline text editor for AngularJS",
+  "main": "ite.js",
+  "keywords": [
+    "angularjs",
+    "inline",
+    "editor",
+    "text",
+    "wysiwyg"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "devDependencies": {
+    "angular": "~1.3.1",
+    "rangy": "1.3",
+    "angular-sanitize": ""
+  },
+  "homepage": "https://github.com/Blitzen/angular-inline-text-editor",
+  "_release": "0.3.16",
+  "_resolution": {
+    "type": "version",
+    "tag": "v0.3.16",
+    "commit": "35caa3cb4708218886382bfde7e0dcf5bde3faf0"
+  },
+  "_source": "git://github.com/Blitzen/angular-inline-text-editor.git",
+  "_target": "0.3.16",
+  "_originalSource": "angular-inline-text-editor"
+}
